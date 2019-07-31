@@ -3,7 +3,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import sys
+
 
 
 class SetUp(QDialog):
@@ -99,10 +99,3 @@ class SetUp(QDialog):
     def rejects(self):
         self.reject()
 
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    fields = ['用户名', '密码', '身高', '体重', '性别', '居住地']
-    form = SetUp(fields)
-    form.show()
-    sys.exit(app.exec_())

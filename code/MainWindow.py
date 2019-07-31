@@ -1,4 +1,6 @@
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtCore import Qt
 import sys
 from OpenFile import OpenFile
 from SetUp import SetUp
@@ -7,84 +9,90 @@ import pandas as pd
 import os
 
 
-
 class MainWindow(QWidget):
-    # data的格式应为[[],[],[]]
     def __init__(self, datastore):
         super().__init__()
         self.setWindowTitle('电子签到')
-        self.resize(700, 700)
-        self.center()
+        self.setWindowIcon(QIcon('../img/AIbot_logo.png'))
+        screen = QDesktopWidget().screenGeometry()
+        # self.setGeometry(0, 0, screen.width(), screen.height())
+        self.resize(screen.width(), screen.height())
+        # self.resize(700, 700)
+        # self.center()
 
         self.datastore = datastore
 
-        # 全局部件（注意参数 self），用于"承载"全局布局
-        wwg = QWidget(self)
+        # 网格布局
+        grid = QGridLayout()
+        grid.setSpacing(10)
 
-        # 全局布局（注意参数 wwg）
-        wl = QVBoxLayout(wwg)
-
-        vlayout = QVBoxLayout()
+        # 控件
+        # One
         self.information = QLabel('提示')
-        # self.top_edit = QTextEdit()
-        self.top_edit = QLabel(datastore.information)
-        vlayout.addWidget(self.information)
-        vlayout.addWidget(self.top_edit)
+        self.information.setStyleSheet(
+            "QLabel{color:rgb(255,0,0);font-size:30px;font-weight:normal;font-family:宋体;}")
 
-        hlayout = QHBoxLayout()
+        self.top_edit = QLabel(datastore.information)
+        self.top_edit.setStyleSheet("QLabel{font-size:25px;font-weight:normal;font-family:宋体;}")
+        # Two
         self.search = QPushButton('查找')
+        self.search.setStyleSheet("QPushButton{font-size:20px;font-weight:normal;font-family:宋体;}")
         self.search.clicked.connect(self.search_btn)
         self.search_value = QLineEdit()
+        self.search_value.setStyleSheet("QLineEdit{font-size:20px;font-weight:normal;font-family:宋体;}")
         self.confirm = QPushButton('确定')
+        self.confirm.setStyleSheet("QPushButton{font-size:20px;font-weight:normal;font-family:宋体;}")
         self.confirm.clicked.connect(self.confirm_btn)
         self.confirm_value = QLineEdit()
-        hlayout.addWidget(self.search)
-        hlayout.addWidget(self.search_value)
-        hlayout.addWidget(self.confirm)
-        hlayout.addWidget(self.confirm_value)
-
-        conLayout = QHBoxLayout()
+        self.confirm_value.setStyleSheet("QLineEdit{font-size:20px;font-weight:normal;font-family:宋体;}")
+        # Third
         self.tableWidget = QTableWidget()
-
         if not self.datastore.selectData.empty:
             self.tableWidget.setRowCount(len(self.datastore.selectData))
             self.tableWidget.setColumnCount(len(self.datastore.selectData[0]))
             for i in range(len(self.datastore.selectData)):
                 for j in range(len(self.datastore.selectData[0])):
                     newItem = QTableWidgetItem(self.datastore.selectData[i][j])
+                    newItem.setTextAlignment(Qt.AlignCenter)
+                    newItem.setFont(QFont("宋体", 20, QFont.Black))
                     self.tableWidget.setItem(i, j, newItem)
             # 设置列名
             self.tableWidget.setHorizontalHeaderLabels(self.datastore.display_field)
-        conLayout.addWidget(self.tableWidget)
+            self.tableWidget.horizontalHeader().setStyleSheet("QHeaderView{font-size:25px;font-weight:bold;font-family:宋体;}")
         # 将表格变为禁止编辑
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # 将表格设置为自适应模式，根据窗口大小来改变网格大小
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         # 将行和列的大小设为与内容相匹配
         self.tableWidget.resizeColumnsToContents()
         self.tableWidget.resizeRowsToContents()
         # 设置有网格线
         self.tableWidget.setShowGrid(True)
-
-        hlayout1 = QHBoxLayout()
+        # Four
         self.openFile = QPushButton('打开文件')
+        self.openFile.setStyleSheet("QPushButton{font-size:20px;font-weight:normal;font-family:宋体;}")
         self.openFile.clicked.connect(self.openfileButtonClick)
         self.setUp = QPushButton('设置')
+        self.setUp.setStyleSheet("QPushButton{font-size:20px;font-weight:normal;font-family:宋体;}")
         self.setUp.clicked.connect(self.setupButtonClick)
-        # self.setUp.clicked.connect(lambda: self.setupButtonClick(self.datastore.columns))
-
-        hlayout1.addWidget(self.openFile)
-        hlayout1.addWidget(self.setUp)
-
-        # 最下方显示打开的文件名
-        vlayout1 = QVBoxLayout()
+        # Five
         self.openfile_information = QLabel('')
-        vlayout1.addWidget(self.openfile_information)
+        # 将控件添加到布局中
+        grid.addWidget(self.information, 1, 0, 1, 6, Qt.AlignCenter | Qt.AlignTop)
+        grid.addWidget(self.top_edit, 2, 0, 1, 6, Qt.AlignCenter)
+        grid.addWidget(self.search, 4, 0, Qt.AlignLeft)
+        grid.addWidget(self.search_value, 4, 1, Qt.AlignLeft)
+        grid.addWidget(self.confirm, 4, 3, Qt.AlignLeft)
+        grid.addWidget(self.confirm_value, 4, 4, Qt.AlignLeft)
 
-        # 这里向局部布局内添加部件,将他加到全局布局
-        wl.addLayout(vlayout)
-        wl.addLayout(hlayout)
-        wl.addLayout(conLayout)
-        wl.addLayout(hlayout1)
-        wl.addLayout(vlayout1)
+        grid.addWidget(self.tableWidget, 5, 0, 6, 5)
+
+        grid.addWidget(self.openFile, 11, 0, 1, 2, Qt.AlignLeft)
+        grid.addWidget(self.setUp, 11, 3, Qt.AlignCenter)
+
+        grid.addWidget(self.openfile_information, 12, 0, 1, 6, Qt.AlignCenter)
+
+        self.setLayout(grid)
 
     # 将窗口移到中央
     def center(self):
@@ -99,9 +107,9 @@ class MainWindow(QWidget):
         # 点击ok,result为1，cancel为0
         result = ofile.exec_()
         self.datastore.path, self.datastore.selectSheet = ofile.getData()
-        print(self.datastore.path)
-        print(self.datastore.selectSheet)
-        print(result)
+        # print(self.datastore.path)
+        # print(self.datastore.selectSheet)
+        # print(result)
         ofile.destroy()
         # 显示打开的文件
         self.openfile_information.setText("打开的文件为：" + os.path.basename(self.datastore.path))
@@ -109,7 +117,7 @@ class MainWindow(QWidget):
         self.open_file(self.datastore.path, self.datastore.selectSheet)
 
     def setupButtonClick(self):
-        print(self.datastore.columns)
+        # print(self.datastore.columns)
         setup = SetUp(self.datastore.columns)
         # 点击ok,result为1，cancel为0
         result = setup.exec_()
@@ -117,11 +125,11 @@ class MainWindow(QWidget):
         self.datastore.display_field = setup.display[:]
         self.datastore.information = setup.information
         self.datastore.confirm_value = setup.confirm_value
-        print(result)
-        print(self.datastore.search_field)
-        print(self.datastore.display_field)
-        print(self.datastore.information)
-        print(self.datastore.confirm_value)
+        # print(result)
+        # print(self.datastore.search_field)
+        # print(self.datastore.display_field)
+        # print(self.datastore.information)
+        # print(self.datastore.confirm_value)
         self.updateInformation()
         self.datastore.selectData = pd.DataFrame()
         # self.search_value.setText('')
@@ -137,9 +145,13 @@ class MainWindow(QWidget):
             for i in range(len(self.datastore.selectData)):
                 for j in range(len(self.datastore.selectData.iloc[0])):
                     newItem = QTableWidgetItem(self.datastore.selectData.iloc[i, j])
+                    newItem.setTextAlignment(Qt.AlignCenter)
+                    newItem.setFont(QFont("宋体", 20))
                     self.tableWidget.setItem(i, j, newItem)
             # 设置列名
             self.tableWidget.setHorizontalHeaderLabels(self.datastore.display_field)
+            self.tableWidget.horizontalHeader().setStyleSheet(
+                "QHeaderView{font-size:20px;font-weight:bold;font-family:宋体;}")
         else:
             self.tableWidget.setRowCount(0)
             self.tableWidget.setColumnCount(0)
@@ -155,14 +167,15 @@ class MainWindow(QWidget):
         # converters = {'ID': str, 'Age': str}  # 把from列和to列都转换为str类型
         try:
             # file = pd.read_excel(path, sheet_name=sheet_name, keep_default_na=False, converters=converters)
-            print('进入到打开文件')
-            print(path)
-            print(sheet_name)
+            # print('进入到打开文件')
+            # print(path)
+            # print(sheet_name)
             self.datastore.data = pd.read_excel(path, sheet_name=sheet_name, keep_default_na=False, dtype=str)
             self.datastore.columns = list(self.datastore.data.columns)
             self.datastore.data['确认'] = ""
         except:
-            print('导入失败')
+            QMessageBox.about(self, "警告", "打开文件失败")
+            # print('导入失败')
 
     # 查找数据
     def filter_data(self, search, show_fileds):
@@ -175,7 +188,7 @@ class MainWindow(QWidget):
 
     # 查找按钮
     def search_btn(self):
-        print("查询按钮的值为：" + self.search_value.text())
+        # print("查询按钮的值为：" + self.search_value.text())
         # 清空确定框里面内容
         self.confirm_value.clear()
         self.datastore.selectData = pd.DataFrame()
@@ -189,8 +202,6 @@ class MainWindow(QWidget):
                     self.updateTable()
                 else:
                     QMessageBox.about(self, "提示", "没有查询到内容")
-
-
             else:
                 QMessageBox.about(self, "警告", "请在设置中输入查询的字段")
         else:
@@ -243,7 +254,6 @@ class MainWindow(QWidget):
         self.confirm_value.clear()
         self.datastore.selectData = pd.DataFrame()
         self.updateTable()
-
 
 
 if __name__ == "__main__":

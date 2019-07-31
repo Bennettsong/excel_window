@@ -3,7 +3,6 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import sys
 import pandas as pd
 import shutil
 import os
@@ -51,7 +50,7 @@ class OpenFile(QDialog):
         dlg.setFilter(QDir.Files)
         if dlg.exec_():
             filePath = dlg.selectedFiles()
-            print(filePath)
+            # print(filePath)
             self.fileName.setText("打开的文件为:" + filePath[0])
 
             filename = os.path.basename(filePath[0])
@@ -59,10 +58,10 @@ class OpenFile(QDialog):
             filename1 = 'new_' + filename
             path1 = os.path.join(dirname, filename1)
             shutil.copy(filePath[0], path1)
-            print(path1)
+            # print(path1)
 
             sheetNames = pd.ExcelFile(path1).sheet_names
-            print(sheetNames)
+            # print(sheetNames)
             self.cb.addItems(sheetNames)
             self.filepath = path1
 
@@ -88,8 +87,3 @@ class OpenFile(QDialog):
         self.reject()
 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    form = OpenFile()
-    form.show()
-    sys.exit(app.exec_())
